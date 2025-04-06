@@ -31,6 +31,14 @@ fn index(words: &State<Vec<String>>) -> Result<Json<WordResponse>, NotFound<&str
     })).ok_or_else(|| NotFound("Out of bounds"))
 }
 
+#[get("/word/<word>")]
+fn word(words: &State<Vec<String>>, word: &str) -> String {
+    if word.len() != 5 {
+        return "false".to_string();
+    }
+    words.contains(&word.to_string()).to_string()
+}
+
 #[launch]
 fn rocket() -> _ {
     let file = File::open("words.txt").expect("Cannot open words.txt");
@@ -40,7 +48,7 @@ fn rocket() -> _ {
         .filter_map(|line| line.ok())
         .collect();
 
-    rocket::build().manage(lines).mount("/", routes![index])
+    rocket::build().manage(lines).mount("/", routes![index, word])
 }
 
 #[derive(Serialize)]
